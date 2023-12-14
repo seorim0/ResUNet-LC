@@ -44,6 +44,10 @@ If you want to get csv file, please contact us.
 
 ![002](https://github.com/seorim0/ResUNet-LC/assets/55497506/75d998ba-8f45-48d7-8ea1-63ba93d44d5b)
 
+![f1_scores_graph_distribution](https://github.com/seorim0/ResUNet-LC/assets/55497506/d7f69fda-a6e4-42d3-8111-e1d76012066f)
+
+![auprc_graph_distribution](https://github.com/seorim0/ResUNet-LC/assets/55497506/f219168f-11ff-478b-a423-284a046302eb)
+
 
 ## Reference   
 **Will Two Do? Varying Dimensions in Electrocardiography: The PhysioNet/Computing in Cardiology Challenge 2021**    
