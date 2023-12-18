@@ -287,8 +287,8 @@ def get_binary_outputs(q, threshold):
 def get_binary_outputs_np(q, threshold):
     labels = np.zeros_like(q)
     for i in range(len(threshold)):
-        pre_q = q[:, i]
+        pre_q = q[i]
         pre_threshold = threshold[i]
 
-        labels[:, i] = pre_q >= pre_threshold
+        labels[i] = pre_q >= pre_threshold
     return labels

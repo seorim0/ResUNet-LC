@@ -1,12 +1,10 @@
 import numpy as np
-from sklearn.metrics import cohen_kappa_score
 
 
-def compute_auc(labels, outputs):
+def compute_auprc(labels, outputs):
     num_recordings, num_classes = np.shape(labels)
 
     # Compute and summarize the confusion matrices for each class across at distinct output values.
-    auroc = np.zeros(num_classes)
     auprc = np.zeros(num_classes)
 
     for k in range(num_classes):
@@ -69,46 +67,15 @@ def compute_auc(labels, outputs):
         # under a piecewise constant with TPR/recall (x-axis) and PPV/precision
         # (y-axis) for class k.
         for j in range(num_thresholds - 1):
-            auroc[k] += 0.5 * (tpr[j + 1] - tpr[j]) * (tnr[j + 1] + tnr[j])
             auprc[k] += (tpr[j + 1] - tpr[j]) * ppv[j + 1]
 
-    # Compute macro AUROC and macro AUPRC across classes.
-    if np.any(np.isfinite(auroc)):
-        macro_auroc = np.nanmean(auroc)
-    else:
-        macro_auroc = float('nan')
+    # Compute AUPRC across classes.
     if np.any(np.isfinite(auprc)):
         macro_auprc = np.nanmean(auprc)
     else:
         macro_auprc = float('nan')
 
-    return macro_auroc, macro_auprc, auroc, auprc
-
-
-def compute_kappa(labels, outputs, num_classes=26):
-    avg_kappa = np.zeros(num_classes)
-    for class_num in range(num_classes):
-        current_t_all = labels[:, class_num]
-        current_binary_outputs = outputs[:, class_num]
-        kappa = cohen_kappa_score(current_t_all, current_binary_outputs)
-        if kappa:
-            avg_kappa[class_num] = kappa
-        else:
-            avg_kappa[class_num] = float('nan')
-    if np.any(np.isfinite(avg_kappa)):
-        avg_kappa = np.nanmean(avg_kappa)
-    else:
-        avg_kappa = float('nan')
-    return avg_kappa
-
-
-# Check if a variable is a number or represents a number.
-def is_number(x):
-    try:
-        float(x)
-        return True
-    except (ValueError, TypeError):
-        return False
+    return macro_auprc
 
 
 def compute_confusion_matrices(labels, outputs, normalize=False):
@@ -154,23 +121,35 @@ def compute_confusion_matrices(labels, outputs, normalize=False):
     return A
 
 
-def compute_f_measure(labels, outputs):
+def compute_f1_sp(labels, outputs):
     num_recordings, num_classes = np.shape(labels)
 
     A = compute_confusion_matrices(labels, outputs)
 
     f_measure = np.zeros(num_classes)
+    specificity = np.zeros(num_classes)  # Specificity 추가
+
     for k in range(num_classes):
         tp, fp, fn, tn = A[k, 1, 1], A[k, 1, 0], A[k, 0, 1], A[k, 0, 0]
+
         if 2 * tp + fp + fn:
             f_measure[k] = float(2 * tp) / float(2 * tp + fp + fn)
         else:
             f_measure[k] = float('nan')
+
+        if tn + fp:
+            specificity[k] = float(tn) / float(tn + fp)
+        else:
+            specificity[k] = float('nan')
 
     if np.any(np.isfinite(f_measure)):
         macro_f_measure = np.nanmean(f_measure)
     else:
         macro_f_measure = float('nan')
 
-    return macro_f_measure, f_measure
+    if np.any(np.isfinite(specificity)):
+        macro_specificity = np.nanmean(specificity)
+    else:
+        macro_specificity = float('nan')
 
+    return macro_f_measure, macro_specificity
